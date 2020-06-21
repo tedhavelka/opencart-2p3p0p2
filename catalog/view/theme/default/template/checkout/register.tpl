@@ -1,4 +1,3 @@
-<!-- 2018-07-24 COMMENT BEGIN
 <div class="row">
   <div class="col-sm-6">
     <fieldset id="account">
@@ -313,17 +312,6 @@
   </div>
 </div>
 <?php } ?>
-2018-07-24 COMMENT END -->
-
-<div class="row">
-<font style="font-size:18px; color:maroon; padding=10px;">
-<ul>
-ASI Store In View Only Mode - New Account Creation Disabled Until July 28th.
-</ul>
-</font>
-</div>
-
-
 <script type="text/javascript"><!--
 // Sort the custom fields
 $('#account .form-group[data-sort]').detach().each(function() {

@@ -1,15 +1,5 @@
-<?php echo $header; echo "<!-- 2018-07-24 - zztop;  this is the start of output from oc_root/catalog/view/theme/default/template/acount/register.tpl -->\n"?>
+<?php echo $header; ?>
 <div class="container">
-
-<!- -NOTICE:  Customer Account Creation Temporarily Disabled - Store In View Only Mode  -->
-
-<font style="font-size:18px; color:maroon; padding=10px;">
-<ul>
-ASI Store In View Only Mode - New Account Creation Disabled Until July 28th.
-</ul>
-</font>
-
-<!-- 2018-07-24 COMMENT BEGIN:
   <ul class="breadcrumb">
     <?php foreach ($breadcrumbs as $breadcrumb) { ?>
     <li><a href="<?php echo $breadcrumb['href']; ?>"><?php echo $breadcrumb['text']; ?></a></li>
@@ -61,7 +51,6 @@ ASI Store In View Only Mode - New Account Creation Disabled Until July 28th.
               <?php } ?>
             </div>
           </div>
-
           <div class="form-group required">
             <label class="col-sm-2 control-label" for="input-lastname"><?php echo $entry_lastname; ?></label>
             <div class="col-sm-10">
@@ -177,8 +166,6 @@ ASI Store In View Only Mode - New Account Creation Disabled Until July 28th.
               <?php } ?>
             </div>
           </div>
-
-
           <?php } ?>
           <?php if ($custom_field['type'] == 'textarea') { ?>
           <div id="custom-field<?php echo $custom_field['custom_field_id']; ?>" class="form-group custom-field" data-sort="<?php echo $custom_field['sort_order']; ?>">
@@ -190,8 +177,6 @@ ASI Store In View Only Mode - New Account Creation Disabled Until July 28th.
               <?php } ?>
             </div>
           </div>
--->
-
           <?php } ?>
           <?php if ($custom_field['type'] == 'file') { ?>
           <div id="custom-field<?php echo $custom_field['custom_field_id']; ?>" class="form-group custom-field" data-sort="<?php echo $custom_field['sort_order']; ?>">
@@ -543,14 +528,7 @@ ASI Store In View Only Mode - New Account Creation Disabled Until July 28th.
       </form>
       <?php echo $content_bottom; ?></div>
     <?php echo $column_right; ?></div>
-2018-07-24 COMMENT END -->
-<!-- should be div closing tag here-->
 </div>
-
-
-<!-- 2018-07-24 - some blank lines added to separate Javascript from PHP: -->
-
-
 <script type="text/javascript"><!--
 // Sort the custom fields
 $('#account .form-group[data-sort]').detach().each(function() {
