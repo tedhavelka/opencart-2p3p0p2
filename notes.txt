@@ -1,0 +1,130 @@
+
+
+2017-06-13 TUE
+
+In file config.php changed first two defines from "http" protocol to "https", - TMH
+
+
+Some references to read for understanding multiple store set up:
+
+   *  https://code.tutsplus.com/tutorials/create-a-multi-store-setup-using-opencart--cms-22261
+
+   *  https://askubuntu.com/questions/463618/setting-up-subdomain-on-ubuntu-server
+
+
+
+2018-03-12 MON
+
+Looks like first PHP scripts to execute in Opencart are,
+
+   *  [site]/public_html/opencart-2p3p0p2/index.php
+   *  [site]/public_html/opencart-2p3p0p2/system/startup.php
+
+      Here are the last lines in second file 'startup.php':
+
+      123 function start($application_config) {
+      124         require_once(DIR_SYSTEM . 'framework.php');
+      125 }
+
+
+In file framework.php, instantiations of PHP objects appear to include:
+
+$ grep -n new framework.php 
+3:$registry = new Registry();
+6:$config = new Config();
+12:$event = new Event($registry);
+18:		$event->register($key, new Action($value));
+23:$loader = new Loader($registry);
+27:$registry->set('request', new Request());
+30:$response = new Response();
+36:	$registry->set('db', new DB($config->get('db_type'), $config->get('db_hostname'), $config->get('db_username'), $config->get('db_password'), $config->get('db_database'), $config->get('db_port')));
+40:$session = new Session();
+49:$registry->set('cache', new Cache($config->get('cache_type'), $config->get('cache_expire')));
+53:	$registry->set('url', new Url($config->get('site_base'), $config->get('site_ssl')));
+57:$language = new Language($config->get('language_default'));
+62:$registry->set('document', new Document());
+93:$controller = new Front($registry);
+98:		$controller->addPreAction(new Action($value));
+103:$controller->dispatch(new Action($config->get('action_router')), new Action($config->get('action_error')));
+
+
+
+2020-06-21 SUN
+
+Work on zero quantity issue, where order editing is locked and disallowed if a given order involves user purchase of the last of a given item.
+
+A key phrase appearing on the final fifth of five order review/editing tabs is the phrase:
+
+   "Products marked with *** are not available in the desired quantity or not in stock!"
+
+A review of this web page's source doesn't contain this text pattern.  But a search among Opencart 2.3.0.2 source files shows the phrase appearing in three files:
+
+$ grep -nr 'in the desired' ./*
+./catalog/language/en-gb/api/cart.php:7:$_['error_stock']      = 'Products marked with *** are not available in the desired quantity or not in stock!';
+./catalog/language/en-gb/api/order.php:14:$_['error_stock']            = 'Warning: Products marked with *** are not available in the desired quantity or not in stock!';
+./catalog/language/en-gb/checkout/cart.php:38:$_['error_stock']              = 'Products marked with *** are not available in the desired quantity or not in stock!';
+
+
+From the path names the most logical of the three files to look into further is the file named order.php.  Can we inject some comment code which will get passed to the browser and show that this is indeed the file that's called when as admin we attempt to edit an order?
+
+Ahh interesting, we amend the error string in order.php and see no change while editing an order for the last item of a certain kind.  Added a couple words to the same error string where it's assigned to a session var in cart.php and that change we see.  So is there a part of Opencart's Javascript which checks for this error condition and forbids order edits when the last item has been purchased?  Also, can this logic distinguish between the last item being purchased, which is a real world case, and additional items beyond the last one?
+
+So we don't see the 'error_stock' phrase in the page source, but perhaps some part of the page references $_[error_stock].  What does a search reveal?
+
+$ grep -nr error_stock ./*
+. . . ignoring matches found in Opencart extensions . . .
+./catalog/controller/api/cart.php:158:				$json['error']['stock'] = $this->language->get('error_stock');
+./catalog/controller/api/order.php:74:				$json['error'] = $this->language->get('error_stock');
+./catalog/controller/api/order.php:452:					$json['error'] = $this->language->get('error_stock');
+./catalog/controller/checkout/cart.php:40:				$data['error_warning'] = $this->language->get('error_stock');
+./catalog/language/en-gb/api/cart.php:7:$_['error_stock']      = '- zztop cart.php - Products marked with *** are not available in the desired quantity or not in stock!';
+./catalog/language/en-gb/api/order.php:14:$_['error_stock']            = 'Warning: <b>- zztop order.php - </b>Products marked with *** are not available in the desired quantity or not in stock!';
+./catalog/language/en-gb/checkout/cart.php:38:$_['error_stock']              = 'Products marked with *** are not available in the desired quantity or not in stock!';
+
+
+. . . Ok, so we're looking at catalog/controller/api/cart.php around line 158, and this is interesting:
+
+156             // Stock
+157             if (!$this->cart->hasStock() && (!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning'))) {
+158                 $json['error']['stock'] = $this->language->get('error_stock');
+159             }
+
+There's a call to a routine named hasStock(), which by its name seems to say that the routine checks whether there is any stock of a given item remaining.  Unfortunately if it works this way, what we really need is a more stateful routine, one we could descriptively name 'hadStock()'.  It may be that to fix this problem, we need to add a check which takes place every time a customer adds or adjusts a product count in there present order.  That check looks to see whether the ending quantity is zero after the change or selection.  If it is, a "meta note" or extra field is added to the order to say "this person bought the last one of item x".
+
+Right now at first we're looking at the lines which present that error message in red, even though what we are really after is to change a behavior of the cart which does not manifest as a visual difference in the final pages or views during edit of an order.
+
+Ok, added some simple tests with PHP echo statements, and we get our answers but they're in a pop-up dialog indicating that there's a JSON syntax error or unexpected token.  Looking at the function we're studying in cart.php there is a call at the end to something called json_encode:
+
+316 
+317         $this->response->addHeader('Content-Type: application/json');
+318         $this->response->setOutput(json_encode($json));
+319     }
+320 }
+
+Here is the function's file and line-wise location:
+
+$ grep -nr 'function json_encode' ./*
+./system/helper/json.php:3:	function json_encode($data) {
+
+
+
+
+
+
+
+
+
+
+##----------------------------------------------------------------------
+## Aside - topic 'breadcrumb'
+##----------------------------------------------------------------------
+
+./catalog/view/theme/default/stylesheet/stylesheet.css:340:/* breadcrumb */
+./catalog/view/theme/default/stylesheet/stylesheet.css:341:.breadcrumb {
+./catalog/view/theme/default/stylesheet/stylesheet.css:346:.breadcrumb i {
+./catalog/view/theme/default/stylesheet/stylesheet.css:349:.breadcrumb > li {
+./catalog/view/theme/default/stylesheet/stylesheet.css:355:.breadcrumb > li + li:before {
+./catalog/view/theme/default/stylesheet/stylesheet.css:359:.breadcrumb > li:after {
+
+
+# --- EOF ---

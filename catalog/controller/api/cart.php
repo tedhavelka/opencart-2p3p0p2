@@ -158,6 +158,50 @@ class ControllerApiCart extends Controller {
 				$json['error']['stock'] = $this->language->get('error_stock');
 			}
 
+// 2020-06-22 Monday
+// NN-0001 BEGIN zero quantity issue:
+if ( 0 )
+{
+            if (!$this->cart->hasStock())
+            {
+                echo "// <!-- cart object's hasStock() function returns false, --><br />\n";
+            }
+            else
+            {
+                echo "// <!-- cart object's hasStock() function returns true, --><br />\n";
+            }
+
+            if (!$this->config->get('config_stock_checkout'))
+            {
+                echo "// <!-- this-&gt;config-&gt;get('config_stock_checkout') returns false,--><br />\n";
+            }
+            else
+            {
+                echo "// <!-- this-&gt;config-&gt;get('config_stock_checkout') returns true,--><br />\n";
+            }
+
+            if ($this->config->get('config_stock_warning'))
+            {
+                echo "// <!-- this-&gt;config-&gt;get('config_stock_warning') returns true,--><br />\n";
+            }
+            else
+            {
+                echo "// <!-- this-&gt;config-&gt;get('config_stock_warning') returns false,--><br />\n";
+            }
+}
+else
+{
+            if (!$this->cart->hasStock())
+                { $json['diag_nn']['nn_0001__this_cart_hasStock'] = "False"; }
+            else
+                { $json['diag_nn']['nn_0001__this_cart_hasStock'] = "True"; }
+}
+
+
+//                echo "<!-- --><br />\n";
+// NN-0001 END zero quantity issue:
+
+
 			// Products
 			$json['products'] = array();
 
