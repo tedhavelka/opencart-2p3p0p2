@@ -197,6 +197,9 @@ else
                 { $json['diag_nn']['nn_0001__this_cart_hasStock'] = "True"; }
 }
 
+//            echo "<!-- \$this->cart->hasStock holds $this->cart->hasStock()). --><br />\n";
+
+
 
 //                echo "<!-- --><br />\n";
 // NN-0001 END zero quantity issue:

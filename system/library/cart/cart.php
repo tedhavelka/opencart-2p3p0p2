@@ -161,7 +161,7 @@ class Cart {
 							);
 						}
 					}
-				}
+				} // end FOREACH json_decode cart option . . .
 
 				$price = $product_query->row['price'];
 
@@ -210,9 +210,27 @@ class Cart {
 					);
 				}
 
+// 2020-06-25 - nn issue, last of item ordered forbids order editing:
+//  Note:  $cart is one row of the $cart_query MYSQL query result,
+//  and $product_query holds the products in the present given cart
+//  being processed:
 				// Stock
 				if (!$product_query->row['quantity'] || ($product_query->row['quantity'] < $cart['quantity'])) {
 					$stock = false;
+// 2020-06-25 - It seems a better test of stock availability would be
+//  for Opencart to track both 'product quantity found' and 'product
+//  quantity ordered' in the given order.  This involves amending the
+//  cart data structure and likely one or more database tables with
+//  an additional field.  Without this limited state available, how
+//  well would the following additional test affect our real world
+//  cart behavior needs? . . .
+				}
+
+// This added test more or less undoes the existing Opencart test
+// commented as 'Stock' just above:
+                if ($product_query->row['quantity'] == 0)
+				{
+					$stock = true;
 				}
 
 				$recurring_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "recurring r LEFT JOIN " . DB_PREFIX . "product_recurring pr ON (r.recurring_id = pr.recurring_id) LEFT JOIN " . DB_PREFIX . "recurring_description rd ON (r.recurring_id = rd.recurring_id) WHERE r.recurring_id = '" . (int)$cart['recurring_id'] . "' AND pr.product_id = '" . (int)$cart['product_id'] . "' AND rd.language_id = " . (int)$this->config->get('config_language_id') . " AND r.status = 1 AND pr.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "'");

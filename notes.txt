@@ -107,8 +107,22 @@ $ grep -nr 'function json_encode' ./*
 ./system/helper/json.php:3:	function json_encode($data) {
 
 
+And the location of function hasStock() is in the file
+
+   $  ./system/library/cart/cart.php:381:	public function hasStock() {
 
 
+2020-06-25 Thursday
+
+381     public function hasStock() {
+382         foreach ($this->getProducts() as $product) {
+383             if (!$product['stock']) {
+384                 return false;
+385             }
+386         }
+387 
+388         return true;
+389     }
 
 
 
